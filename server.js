@@ -4,7 +4,7 @@ var nodemailer    = require('nodemailer');
 var path	      = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
 
-var templatesDir = path.resolve(__dirname, 'app/templates');
+var templatesDir = path.resolve(__dirname, 'templates');
 
 app.use(express.static('app'));
 
