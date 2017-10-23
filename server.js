@@ -32,7 +32,7 @@ app.get('/sendContact', function (req, res) {
 
     smtpTransport.sendMail({
       from: locals.email,
-      to: 'user@gmail.com',
+      to: 'concatcontact@gmail.com',
       subject: 'Contact Request',
       html: results.html,
       text: results.text
