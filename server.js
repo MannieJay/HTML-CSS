@@ -1,7 +1,10 @@
-// server.js
-var express    = require('express');
-var app	    = express();
-var nodemailer = require('nodemailer');
+var express 	  = require('express');
+var app		   = express();
+var nodemailer    = require('nodemailer');
+var path	      = require('path');
+var EmailTemplate = require('email-templates').EmailTemplate;
+
+var templatesDir = path.resolve(__dirname, 'app/templates');
 
 app.use(express.static('app'));
 
@@ -14,25 +17,40 @@ var smtpTransport = nodemailer.createTransport('SMTP', {
   }
 });
 
-var mailOptions = {
-  from: 'Fred Foo <foo@blurdybloop.com>', // Sender Address
-  to: 'user@gmail.com',
-  subject: 'Contact Request', // Subject Line
-  text: 'Hello World!', // Plaintext Body
-  html: '<b>Hello Word! </b>' // HTML Body
-}
+app.get('/sendContact', function (req, res) {
+  var template = new EmailTemplate(path.join(templatesDir, 'contact-request'));
+  var locals = {
+    email: req.query.email,
+    name: req.query.name,
+    message: req.query.message
+  };
 
-smtpTransport.sendMail(mailOptions, function (error, response) {
-  if (error) {
-    console.log(error);
-  } else{
-    console.log('Message sent: ' + response.message);
-  }
+  template.render(locals, function (err, results) {
+    if (err) {
+      return console.error(err);
+    }
+
+    smtpTransport.sendMail({
+      from: locals.email,
+      to: 'user@gmail.com',
+      subject: 'Contact Request',
+      html: results.html,
+      text: results.text
+    }, function (err, responseStatus) {
+      if (err) {
+        console.error(err);
+  res.end('error');
+      } else {
+        console.log(responseStatus.message);
+        res.end('sent');
+      }
+    });
+  });
 });
 
 var server = app.listen(8080, function () {
   var host = 'localhost';
   var port = server.address().port;
 
-  console.log('Example app listening at http://%s:%s', host, port);
+  console.log('Contact app listening at http://%s:%s', host, port);
 });
